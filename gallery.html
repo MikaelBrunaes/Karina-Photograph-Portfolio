@@ -27,6 +27,7 @@
   html {
     height: 100%;
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 
   body {
@@ -45,6 +46,7 @@
 
   img {
     max-width: 100%;
+    height: auto;
     display: block;
   }
 
@@ -88,6 +90,17 @@
   .nav-links a.active {
     border-bottom: 1px solid var(--white);
     opacity: 0.85;
+  }
+
+  .nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 210;
   }
 
   .reveal {
@@ -148,6 +161,7 @@
   }
 
   .masonry-item img {
+    max-width: 100%;
     width: 100%;
     height: auto;
     filter: grayscale(100%);
@@ -323,6 +337,10 @@
     .scroll-top-btn {
       transition: opacity 0.2s ease, visibility 0.2s ease;
     }
+
+    .nav-links {
+      transition: none;
+    }
   }
 
   /* Responsive */
@@ -335,15 +353,37 @@
   @media (max-width: 768px) {
     .navbar {
       padding: 20px 16px;
+      justify-content: flex-end;
+    }
+
+    .nav-toggle {
+      display: block;
     }
 
     .nav-links {
-      gap: 24px;
+      position: fixed;
+      inset: 0;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 40px;
+      background-color: var(--black);
+      transform: translateX(100%);
+      opacity: 0;
+      visibility: hidden;
+      transition: transform 0.4s ease, opacity 0.4s ease, visibility 0.4s ease;
+      z-index: 205;
+    }
+
+    .nav-links.is-open {
+      transform: translateX(0);
+      opacity: 1;
+      visibility: visible;
     }
 
     .nav-links a {
-      font-size: 0.7rem;
-      letter-spacing: 2px;
+      font-size: 1rem;
+      letter-spacing: 3px;
     }
 
     .page-header {
@@ -384,22 +424,13 @@
     }
   }
 
-  @media (max-width: 420px) {
-    .nav-links {
-      gap: 14px;
-    }
-
-    .nav-links a {
-      font-size: 0.62rem;
-      letter-spacing: 1.5px;
-    }
-  }
 </style>
 </head>
 <body>
 
   <nav class="navbar">
-    <ul class="nav-links">
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navLinks">&#9776;</button>
+    <ul class="nav-links" id="navLinks">
       <li><a href="index.html">Home</a></li>
       <li><a href="gallery.html" class="active">Gallery</a></li>
       <li><a href="about.html">About</a></li>
@@ -435,6 +466,37 @@
   </button>
 
   <script>
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+
+    function closeNav() {
+      navLinks.classList.remove('is-open');
+      navToggle.setAttribute('aria-expanded', 'false');
+      navToggle.innerHTML = '&#9776;';
+      document.body.style.overflow = '';
+    }
+
+    function openNav() {
+      navLinks.classList.add('is-open');
+      navToggle.setAttribute('aria-expanded', 'true');
+      navToggle.innerHTML = '&#10005;';
+      document.body.style.overflow = 'hidden';
+    }
+
+    navToggle.addEventListener('click', () => {
+      navLinks.classList.contains('is-open') ? closeNav() : openNav();
+    });
+
+    navLinks.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeNav));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeNav();
+    });
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) closeNav();
+    });
+
     const photoSizes = [
       { w: 800, h: 1000 },
       { w: 800, h: 600 },
